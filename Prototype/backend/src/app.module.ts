@@ -9,7 +9,14 @@ import { WatchlistModule } from './watchlist/watchlist.module';
 import { WsModule } from './ws/ws.module';
 
 @Module({
-  imports: [PrismaModule, UsersModule, AuthModule, StocksModule, WatchlistModule, WsModule],
+  imports: [
+    PrismaModule,
+    UsersModule,
+    AuthModule,
+    StocksModule,
+    WatchlistModule,
+    WsModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

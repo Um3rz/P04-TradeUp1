@@ -24,32 +24,27 @@ export default function DashboardPage() {
       ? process.env.NEXT_PUBLIC_API_BASE_URL
       : "http://localhost:3001";
 
-  // ---------- Core state ----------
   const [featured, setFeatured] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = React.useState<Date | null>(null);
 
-  // Watchlist state
   const [watchlist, setWatchlist] = React.useState<Set<string>>(new Set());
   const [watchlistRows, setWatchlistRows] = React.useState<any[]>([]);
   const [saving, setSaving] = React.useState<Set<string>>(new Set());
   const [removing, setRemoving] = React.useState<Set<string>>(new Set());
 
-  // Token
   const tokenRef = React.useRef<string | null>(null);
   React.useEffect(() => {
     tokenRef.current =
       (typeof window !== "undefined" && localStorage.getItem("access_token")) || null;
   }, []);
 
-  // Track auth for UI (header button label)
   const [authed, setAuthed] = React.useState(false);
   React.useEffect(() => {
     setAuthed(!!tokenRef.current);
   }, []);
 
-  // SIGN-OUT BLOCK
   const router = useRouter();
   function signOut() {
     // Clear token
@@ -58,11 +53,9 @@ export default function DashboardPage() {
     }
     tokenRef.current = null;
     setAuthed(false);
-    // Reset any auth-scoped UI so the page looks clean
     setWatchlist(new Set());
     setWatchlistRows([]);
 
-    // Navigate to the auth page (your default homepage)
     router.push("/");
   }
 
