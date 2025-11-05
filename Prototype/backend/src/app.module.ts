@@ -11,13 +11,12 @@ import { WsModule } from './ws/ws.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
     PrismaModule,
     UsersModule,
     AuthModule,
     StocksModule,
     WatchlistModule,
-    WsModule
+    WsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
