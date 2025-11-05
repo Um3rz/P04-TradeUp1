@@ -10,7 +10,7 @@ export default function portfolio() {
     return (
         <div className='min-h-screen bg-[#111418]'>
             <TopBar/>
-            <div id='container' className='flex justify-center gap-10'>
+            <div id='container' className='flex justify-center gap-10 mt-18'>
                 <div className='bg-[#181B20] text-white rounded-3xl flex flex-col w-90 h-120 p-7 gap-4'>
                     <h1 className='font-semibold text-3xl mb-10'>Portfolio</h1>
                     <h2>Total Balance</h2>
