@@ -14,6 +14,10 @@
   TRADER
   ADMIN
  }
+ enum TransactionType {
+  BUY
+  SELL
+}
 
  // Models
  model User {
@@ -22,6 +26,11 @@
   passwordHash String
   role         Role            @default(TRADER)
   createdAt    DateTime        @default(now())
+
+  // Relations
+  balance      Decimal   @default(1000000)  // Starting balance
+  portfolio    Portfolio[]
+  transactions Transaction[]
   watchlist    WatchlistItem[]
  }
 
@@ -32,6 +41,8 @@
   marketType String          @default("REG")
   createdAt  DateTime        @default(now())
   watchers   WatchlistItem[]
+  portfolio  Portfolio[]
+  transactions Transaction[]
  }
 
  model WatchlistItem {
@@ -44,3 +55,32 @@
 
   @@unique([userId, stockId])
  }
+
+// PORTFOLIO: one row per user+stock with whole-share quantity
+model Portfolio {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  stockId   Int
+  quantity  Int
+  avgPrice  Decimal
+  user      User     @relation(fields: [userId], references: [id])
+  stock     Stock    @relation(fields: [stockId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, stockId])
+}
+
+// LEDGER: append-only transaction history (execution price is per-share)
+model Transaction {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  stockId     Int
+  type        TransactionType  // BUY or SELL
+  quantity    Int
+  price       Decimal
+  total       Decimal
+  user        User     @relation(fields: [userId], references: [id])
+  stock       Stock    @relation(fields: [stockId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
