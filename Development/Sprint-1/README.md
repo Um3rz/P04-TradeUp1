@@ -1,7 +1,10 @@
 Project: P04 TradeUp
 Team: Names and ids of team members.
-Muhammad Rayyan Khan 26100216
-Muhammad Ahmad 26100200
+26100216 MUHAMMAD RAYYAN KHAN
+26100200 MUHAMMAD AHMAD
+26100204 MUHAMMAD SHAHMIR SHER QAZI
+26100355 MUHAMMAD UMAR ZUBAIR
+25100137 MOHAMMED RAIYAAN JUNAID HAMID
 
 SPRINT-1 SUBMISSION GUIDELINES
 
@@ -21,7 +24,8 @@ LIST OF REQUIREMENTS COMPLETED IN THE SPRINT
 
 
 <List down use cases completed in the current sprint. For each use case, also mention the name of individual team member who developed it.>
-
+Muhammad Rayyan Khan: Update email/pw, profile picture
+Muhammad Ahmad: Stock news page
 
 
 
