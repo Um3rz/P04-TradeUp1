@@ -7,7 +7,7 @@ export class WatchlistService {
   constructor(private readonly prisma: PrismaService) {}
 
   private ensureFeatured(symbol: string) {
-    if (!FEATURED_SYMBOLS.includes(symbol as any)) {
+    if (!(FEATURED_SYMBOLS as readonly string[]).includes(symbol)) {
       throw new BadRequestException(
         'Only featured symbols are allowed in Phase 1',
       );

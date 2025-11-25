@@ -1,6 +1,12 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { StocksService } from './stocks.service';
 
+interface KlineOptions {
+  start?: number;
+  end?: number;
+  limit?: number;
+}
+
 @Controller('stocks')
 export class StocksController {
   constructor(private readonly stocks: StocksService) {}
@@ -18,7 +24,7 @@ export class StocksController {
     @Query('end') end?: string,
     @Query('limit') limit?: string,
   ) {
-    const options: any = {};
+    const options: KlineOptions = {};
     if (start) options.start = parseInt(start, 10);
     if (end) options.end = parseInt(end, 10);
     if (limit) options.limit = parseInt(limit, 10);
@@ -29,6 +35,7 @@ export class StocksController {
 
   @Get(':symbol')
   async bySymbol(@Param('symbol') symbol: string) {
-    return { symbol, tick: await this.stocks.getTick(symbol) };
+    const tick = await this.stocks.getTick(symbol);
+    return { symbol, tick };
   }
 }

@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { OnModuleInit } from '@nestjs/common';
 import {
   WebSocketGateway,
@@ -7,8 +10,14 @@ import {
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import WebSocket from 'ws';
+import { WebSocket } from 'ws';
 import { FEATURED_SYMBOLS, PSX_WS_URL } from '../common/constants';
+
+interface TickUpdateMessage {
+  type: string;
+  symbol?: string;
+  [key: string]: unknown;
+}
 
 @WebSocketGateway({ namespace: '/ws', cors: true })
 export class MarketGateway implements OnModuleInit {
@@ -21,16 +30,15 @@ export class MarketGateway implements OnModuleInit {
     this.connectUpstream();
   }
 
-  // Client asks to receive updates for a single symbol (must be in FEATURED_SYMBOLS for Phase 1)
   @SubscribeMessage('subscribeSymbol')
   handleSubscribe(
     @ConnectedSocket() socket: Socket,
     @MessageBody() symbol: string,
   ) {
-    if (!FEATURED_SYMBOLS.includes(symbol as any)) {
+    if (!(FEATURED_SYMBOLS as readonly string[]).includes(symbol)) {
       return;
     }
-    socket.join(`symbol:${symbol}`);
+    void socket.join(`symbol:${symbol}`);
     socket.emit('subscribed', { symbol });
   }
 
@@ -52,23 +60,29 @@ export class MarketGateway implements OnModuleInit {
 
     ws.on('message', (data) => {
       try {
-        const msg = JSON.parse(String(data));
+        const msg: TickUpdateMessage = JSON.parse(
+          String(data),
+        ) as TickUpdateMessage;
         if (msg?.type === 'tickUpdate' && msg?.symbol) {
-          // emit only to clients subscribed to this symbol
           console.log(msg);
           this.server.to(`symbol:${msg.symbol}`).emit('tickUpdate', msg);
         }
-      } catch {}
+      } catch (error) {
+        console.error('Failed to parse WebSocket message:', error);
+      }
     });
 
     ws.on('close', () => {
       setTimeout(() => this.connectUpstream(), 2000);
     });
 
-    ws.on('error', () => {
+    ws.on('error', (error) => {
+      console.error('WebSocket error:', error);
       try {
         ws.close();
-      } catch {}
+      } catch (closeError) {
+        console.error('Failed to close WebSocket:', closeError);
+      }
     });
   }
 }

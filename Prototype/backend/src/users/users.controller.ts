@@ -4,13 +4,21 @@ import { UsersService } from './users.service';
 import * as bcrypt from 'bcrypt';
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
 
+interface AuthenticatedRequest {
+  user: {
+    userId: number;
+    email: string;
+    role: 'TRADER' | 'ADMIN';
+  };
+}
+
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  async getProfile(@Request() req) {
+  async getProfile(@Request() req: AuthenticatedRequest) {
     // Mask userId in logs
     console.log('JWT User object:', {
       ...req.user,
@@ -31,21 +39,20 @@ export class UsersController {
       throw new UnauthorizedException('User not found');
     }
 
-    // Return user profile with sensitive fields removed
     const { passwordHash, ...userProfile } = user;
+    void passwordHash;
     return userProfile;
   }
 
-  // Temporary test endpoint (remove this later)
   @Get('test')
-  async test() {
+  test() {
     return { message: 'Users controller is working!' };
   }
 
   @UseGuards(JwtAuthGuard)
   @Put('email')
   async changeEmail(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Body() body: { newEmail: string; currentPassword: string },
   ) {
     const userId = req.user.userId;
@@ -89,7 +96,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Put('password')
   async changePassword(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Body() body: { currentPassword: string; newPassword: string },
   ) {
     const userId = req.user.userId;
@@ -127,7 +134,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Put('name')
   async changeName(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Body() body: { newName: string; currentPassword: string },
   ) {
     const userId = req.user.userId;

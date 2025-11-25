@@ -11,20 +11,31 @@ import { BuyStockDto } from './dto/buy-stock.dto';
 import { SellStockDto } from './dto/sell-stock.dto';
 import { TradesService } from './trades.service';
 
+interface AuthenticatedRequest {
+  user: {
+    userId: number;
+    email: string;
+    role: 'TRADER' | 'ADMIN';
+  };
+}
+
 @Controller('trades')
 export class TradesController {
   constructor(private readonly tradesService: TradesService) {}
 
   @UseGuards(JwtAuthGuard)
   @Get('portfolio')
-  getPortfolio(@Request() req) {
+  getPortfolio(@Request() req: AuthenticatedRequest) {
     const userId = req.user.userId;
     return this.tradesService.getPortfolio(userId);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('buy')
-  buyStock(@Request() req, @Body() buyStockDto: BuyStockDto) {
+  buyStock(
+    @Request() req: AuthenticatedRequest,
+    @Body() buyStockDto: BuyStockDto,
+  ) {
     const userId = req.user.userId;
     const { symbol, quantity } = buyStockDto;
     return this.tradesService.buyStock(userId, symbol, quantity);
@@ -32,7 +43,10 @@ export class TradesController {
 
   @UseGuards(JwtAuthGuard)
   @Post('sell')
-  sellStock(@Request() req, @Body() sellStockDto: SellStockDto) {
+  sellStock(
+    @Request() req: AuthenticatedRequest,
+    @Body() sellStockDto: SellStockDto,
+  ) {
     const userId = req.user.userId;
     const { symbol, quantity } = sellStockDto;
     return this.tradesService.sellStock(userId, symbol, quantity);

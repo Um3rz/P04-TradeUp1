@@ -6,6 +6,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { StocksService } from '../stocks/stocks.service';
 import { Decimal } from '@prisma/client/runtime/library';
+import { Portfolio } from '@prisma/client';
 
 @Injectable()
 export class TradesService {
@@ -133,7 +134,7 @@ export class TradesService {
         data: { balance: { increment: totalSale } },
       });
 
-      let updatedPortfolioItem;
+      let updatedPortfolioItem: Portfolio | null;
       const remainingQuantity = portfolioItem.quantity - quantity;
 
       if (remainingQuantity === 0) {
@@ -183,7 +184,8 @@ export class TradesService {
     const portfolioWithPnl = await Promise.all(
       portfolioItems.map(async (item) => {
         const tick = await this.stocks.getTick(item.stock.symbol);
-        const currentPrice = new Decimal(tick?.price || 0);
+        const currentPriceValue = tick?.price ?? 0;
+        const currentPrice = new Decimal(currentPriceValue);
 
         const previousDayClose = await this.stocks.getPreviousDayClose(
           item.stock.symbol,

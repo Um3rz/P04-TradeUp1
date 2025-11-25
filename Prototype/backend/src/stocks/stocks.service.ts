@@ -3,6 +3,22 @@ import axios from 'axios';
 import { FEATURED_SYMBOLS, PSX_API_BASE } from '../common/constants';
 import { PrismaService } from '../prisma/prisma.service';
 
+interface PsxApiResponse<T> {
+  success: boolean;
+  data: T;
+}
+
+export interface TickData {
+  symbol: string;
+  price: number;
+  change?: number;
+  percentChange?: number;
+  volume?: number;
+  [key: string]: unknown;
+}
+
+export type Kline = [number, number, number, number, number, number];
+
 @Injectable()
 export class StocksService {
   private readonly base = PSX_API_BASE;
@@ -13,9 +29,11 @@ export class StocksService {
     return FEATURED_SYMBOLS as readonly string[];
   }
 
-  async getTick(symbol: string, type = 'REG') {
+  async getTick(symbol: string, type = 'REG'): Promise<TickData | null> {
     const url = `${this.base}/api/ticks/${type}/${encodeURIComponent(symbol)}`;
-    const { data } = await axios.get(url, { timeout: 5000 });
+    const { data } = await axios.get<PsxApiResponse<TickData>>(url, {
+      timeout: 5000,
+    });
     if (data?.success) return data.data;
     return null;
   }
@@ -32,16 +50,19 @@ export class StocksService {
     symbol: string,
     timeframe: string = '1m',
     options?: { start?: number; end?: number; limit?: number },
-  ) {
+  ): Promise<Kline[]> {
     const url = `${this.base}/api/klines/${encodeURIComponent(symbol)}/${timeframe}`;
-    const params: any = {};
+    const params: { start?: number; end?: number; limit?: number } = {};
 
     if (options?.start) params.start = options.start;
     if (options?.end) params.end = options.end;
     if (options?.limit) params.limit = options.limit;
 
     try {
-      const { data } = await axios.get(url, { params, timeout: 10000 });
+      const { data } = await axios.get<PsxApiResponse<Kline[]>>(url, {
+        params,
+        timeout: 10000,
+      });
       if (data?.success && Array.isArray(data.data)) {
         return data.data;
       }
@@ -59,29 +80,24 @@ export class StocksService {
       return null;
     }
 
-    // kline format: [time, open, high, low, close, volume]
-    // Assuming time is in seconds, and klines are sorted chronologically ascending.
     const lastKline = klines[klines.length - 1];
+    if (!lastKline) return null;
+
     const lastKlineTime = new Date(lastKline[0] * 1000);
 
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
 
     if (lastKlineTime.getTime() >= today.getTime()) {
-      // The last kline is from today.
       if (klines.length > 1) {
-        // The one before is from yesterday.
         const yesterdayKline = klines[klines.length - 2];
-        return yesterdayKline[4]; // close price
+        if (!yesterdayKline) return null;
+        return yesterdayKline[4];
       } else {
-        // Only today's kline is available, no previous day's close.
         return null;
       }
     } else {
-      // The last kline is from before today (e.g., yesterday).
-      // This happens on weekends or holidays.
-      // We'll use its close as the reference price.
-      return lastKline[4]; // close price
+      return lastKline[4];
     }
   }
 
