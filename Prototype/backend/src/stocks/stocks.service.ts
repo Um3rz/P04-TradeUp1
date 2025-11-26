@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { FEATURED_SYMBOLS, PSX_API_BASE } from '../common/constants';
-import { PrismaService } from '../prisma/prisma.service';
 
 interface PsxApiResponse<T> {
   success: boolean;
@@ -23,8 +22,6 @@ export type Kline = [number, number, number, number, number, number];
 export class StocksService {
   private readonly base = PSX_API_BASE;
 
-  constructor(private readonly prisma: PrismaService) {}
-
   getFeaturedSymbols() {
     return FEATURED_SYMBOLS as readonly string[];
   }
@@ -41,7 +38,7 @@ export class StocksService {
   async listFeaturedWithTicks() {
     const symbols = this.getFeaturedSymbols();
     const results = await Promise.all(
-      symbols.map(async (s) => ({ symbol: s, tick: await this.getTick(s) })),
+      symbols.map(async (s) => ({ symbol: s, tick: await this.getTick(s) }))
     );
     return results;
   }
