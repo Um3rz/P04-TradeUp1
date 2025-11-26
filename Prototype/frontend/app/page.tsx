@@ -3,8 +3,8 @@ import { Tagline } from "@/components/auth/tagline";
 
 export default function AuthPage() {
   return (
-    <main className="min-h-svh w-full bg-[#111418] flex items-center justify-center overflow-hidden">
-      <div className="flex min-h-140">
+    <main className="grid place-items-center min-h-screen">
+      <div className="grid grid-cols-1 md:grid-cols-2 w-[980px] h-[640px] rounded-3xl shadow-2xl overflow-hidden">
         <AuthForm />
         <Tagline />
       </div>

@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { Spinner } from "../spinner";
-import { RoleChip } from "./role-chip";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -24,7 +23,6 @@ export function AuthForm() {
     setValue,
     watch,
   } = useForm<AuthFormFields>({ mode: "onBlur" });
-  const [role, setRole] = useState<"TRADER" | "ADMIN" | "">("");
   const [showPw, setShowPw] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{
@@ -53,7 +51,7 @@ export function AuthForm() {
     try {
       const url = mode === "signin" ? "/auth/login" : "/auth/signup";
       const body: { email: string; password: string; role?: string } = { email: data.email, password: data.password };
-      if (mode === "signup" && role) body.role = role;
+      if (mode === "signup") body.role = "USER";
 
       const res = await fetch(`${API_BASE}${url}`, {
         method: "POST",
@@ -96,12 +94,12 @@ export function AuthForm() {
   }
 
   return (
-    <section className="w-100 relative rounded-bl-3xl rounded-tl-3xl bg-[#1C1F24] shadow-lg ring-1 ring-[#2D3139] overflow-hidden">
+    <section className="relative w-full m-10 rounded-l-3xl bg-black/20 backdrop-blur-lg border border-white/10 shadow-lg overflow-y-auto">
       <header className="px-6 pt-6 pb-2">
         <h1 className="text-2xl font-semibold tracking-tight text-white">
           {mode === "signin" ? "Welcome back" : "Create your account"}
         </h1>
-        <p className="mt-1 text-sm text-gray-400">
+        <p className="mt-1 text-sm text-gray-300">
           {mode === "signin"
             ? "Sign in to continue."
             : "It takes less than a minute."}
@@ -109,14 +107,14 @@ export function AuthForm() {
       </header>
 
       <div className="px-6 pt-2">
-        <div className="inline-flex rounded-full bg-gray-800 p-1">
+        <div className="inline-flex rounded-full bg-black/20 border border-white/10 p-1">
           <button
             onClick={() => setMode("signin")}
             aria-pressed={mode === "signin"}
             className={`cursor-pointer px-4 py-1.5 text-sm rounded-full transition-all ${
               mode === "signin"
-                ? "bg-gray-700 shadow text-white"
-                : "text-gray-400 hover:text-white"
+                ? "bg-white/10 shadow text-white"
+                : "text-gray-300 hover:text-white"
             }`}
           >
             Sign in
@@ -126,8 +124,8 @@ export function AuthForm() {
             aria-pressed={mode === "signup"}
             className={`cursor-pointer px-4 py-1.5 text-sm rounded-full transition-all ${
               mode === "signup"
-                ? "bg-gray-700 shadow text-white"
-                : "text-gray-400 hover:text-white"
+                ? "bg-white/10 shadow text-white"
+                : "text-gray-300 hover:text-white"
             }`}
           >
             Sign up
@@ -150,9 +148,10 @@ export function AuthForm() {
               },
             })}
             placeholder="you@example.com"
+            className="bg-black/20 border-white/20"
           />
           {errors.email && (
-            <span className="text-red-500 text-xs mt-1">
+            <span className="text-red-400 text-xs mt-1">
               {errors.email.message}
             </span>
           )}
@@ -177,12 +176,13 @@ export function AuthForm() {
               placeholder={
                 mode === "signin" ? "Your password" : "At least 8 characters"
               }
+              className="bg-black/20 border-white/20"
             />
             <button
               type="button"
               onClick={() => setShowPw((s) => !s)}
               aria-label={showPw ? "Hide password" : "Show password"}
-              className="absolute inset-y-0 right-0 px-3 text-gray-400 hover:text-white"
+              className="absolute inset-y-0 right-0 px-3 text-gray-300 hover:text-white"
             >
               {showPw ? (
                 <svg
@@ -234,7 +234,7 @@ export function AuthForm() {
             </button>
           </div>
           {errors.password && (
-            <span className="text-red-500 text-xs mt-1">
+            <span className="text-red-400 text-xs mt-1">
               {errors.password.message}
             </span>
           )}
@@ -252,29 +252,13 @@ export function AuthForm() {
                   value === watch("password") || "Passwords do not match",
               })}
               placeholder="Repeat password"
+              className="bg-black/20 border-white/20"
             />
             {errors.confirm && (
-              <span className="text-red-500 text-xs mt-1">
+              <span className="text-red-400 text-xs mt-1">
                 {errors.confirm.message}
               </span>
             )}
-          </div>
-        )}
-
-        {mode === "signup" && (
-          <div>
-            <Label>Role (optional)</Label>
-            <div className="flex gap-2 items-center">
-              <RoleChip current={role} onPick={setRole} value="TRADER" />
-              <RoleChip current={role} onPick={setRole} value="ADMIN" />
-              <button
-                type="button"
-                onClick={() => setRole("")}
-                className="text-xs text-gray-500 underline ml-2"
-              >
-                Clear
-              </button>
-            </div>
           </div>
         )}
 
@@ -283,8 +267,8 @@ export function AuthForm() {
             role={message.type === "error" ? "alert" : "status"}
             className={`text-sm rounded-xl px-3 py-2 border ${
               message.type === "error"
-                ? "bg-red-900/20 text-red-400 border-red-900/50"
-                : "bg-green-900/20 text-green-400 border-green-900/50"
+                ? "bg-red-900/30 text-red-300 border-red-500/30"
+                : "bg-green-900/30 text-green-300 border-green-500/30"
             }`}
           >
             {message.text}
@@ -328,7 +312,7 @@ export function AuthForm() {
             type="button"
             onClick={browseAsGuest}
             variant="outline"
-            className="w-full"
+            className="w-full bg-black border-white/20 text-white hover:bg-black/40"
           >
             Browse stocks as guest
           </Button>
@@ -337,7 +321,7 @@ export function AuthForm() {
           </p>
         </div>
 
-        <p className="text-center text-sm text-gray-400 pt-1">
+        <p className="text-center text-sm text-gray-300 pt-1">
           {mode === "signin" ? (
             <>
               Don&apos;t have an account?{" "}
