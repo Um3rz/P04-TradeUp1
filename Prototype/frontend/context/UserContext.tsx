@@ -18,6 +18,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
 
   const refreshUser = async () => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+    if (!token) {
+      setUser(null);
+      // Optionally, redirect to login or show a message here
+      return;
+    }
     const profile = await getUserProfile();
     setUser(profile);
   };
