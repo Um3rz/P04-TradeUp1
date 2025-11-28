@@ -19,7 +19,7 @@ export default function Settings() {
 
     const { register, handleSubmit, setValue, formState: { errors } } = useForm<AuthFormFields>();
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const { user, isLoading, refreshUser } = useUser();
+    const { user, isLoading, checkedAuth, refreshUser } = useUser();
     const handleButtonClick = () => {
         if (fileInputRef.current) {
             fileInputRef.current.click();
@@ -83,13 +83,19 @@ export default function Settings() {
         }
     }, [user, setValue]);
 
+    const [redirecting, setRedirecting] = useState(false);
     useEffect(() => {
-        if (!isLoading && user === null) {
+        const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+        if (checkedAuth && !isLoading && !token) {
+            setRedirecting(true);
             router.push("/");
         }
-    }, [isLoading, user, router]);
+    }, [checkedAuth, isLoading, user, router]);
 
-    if (isLoading || user === null) {
+    if (redirecting) {
+        return null;
+    }
+    if (!checkedAuth || isLoading) {
         return (
             <div className='min-h-screen bg-[#111418] flex items-center justify-center'>
                 <span className='text-white text-xl'>Loading...</span>
