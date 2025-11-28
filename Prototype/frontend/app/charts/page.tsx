@@ -285,6 +285,7 @@ export default function Charts() {
         });
     }, [API_BASE_URL, getCandleStartTime]);
 
+    // Update chart when candle data changes
     useEffect(() => {
         initializeChart();
 
@@ -464,6 +465,23 @@ export default function Charts() {
                                     </p>
                                 </div>
                             )}
+                        </CardContent>
+                    </Card>
+
+                    <Card className="bg-[#1C1F24] border-[#2D3139]">
+                        <CardContent className="p-6">
+                            <h3 className="text-lg font-medium text-[#E4E6EB] mb-3">Latest Tick Data</h3>
+                            <div className="space-y-2">
+                                {tickData ? (
+                                    <div className="font-mono text-xs bg-[#2D3139] p-3 rounded-md max-h-32 overflow-y-auto">
+                                        <pre className="text-[#9BA1A6] whitespace-pre-wrap">
+                                            {JSON.stringify(tickData, null, 2)}
+                                        </pre>
+                                    </div>
+                                ) : (
+                                    <p className="text-[#9BA1A6]">Waiting for data...</p>
+                                )}
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
