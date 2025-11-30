@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { StocksModule } from './stocks/stocks.module';
 import { WatchlistModule } from './watchlist/watchlist.module';
 import { WsModule } from './ws/ws.module';
+import { NewsModule } from './news/news.module';
 
 @Module({
   imports: [
@@ -24,7 +25,8 @@ import { WsModule } from './ws/ws.module';
     AuthModule,
     StocksModule,
     WatchlistModule,
-    WsModule
+  WsModule,
+  NewsModule
   ],
   controllers: [AppController],
   providers: [AppService],

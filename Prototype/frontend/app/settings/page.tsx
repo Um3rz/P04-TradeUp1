@@ -5,10 +5,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { useRouter } from 'next/navigation';
-import { getUserProfile, User, updateUserName, updateUserEmail, updateUserPassword } from "@/lib/userService";
+import { uploadProfileImage, getUserProfile, User, updateUserName, updateUserEmail, updateUserPassword } from "@/lib/userService";
+import { useUser } from "@/context/UserContext";
+
 
 export default function Settings() {
-
     type AuthFormFields = {
         name: string;
         email: string;
@@ -17,9 +18,30 @@ export default function Settings() {
     };
 
     const { register, handleSubmit, setValue, formState: { errors } } = useForm<AuthFormFields>();
-    const [image, setImage] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const [user,setUser] = useState<User | null>(null);
+    const { user, isLoading, refreshUser } = useUser();
+    const router = useRouter();
+
+    // Session check state
+    const [sessionChecked, setSessionChecked] = useState(false);
+
+    useEffect(() => {
+        const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+        if (!token) {
+            router.replace("/"); // Redirect to login immediately
+        } else {
+            setSessionChecked(true);
+        }
+    }, [router]);
+
+    // Only show loading spinner until user is loaded
+    useEffect(() => {
+        if (user) {
+            setValue('name', user.name || '');
+            setValue('email', user.email || '');
+        }
+    }, [user, setValue]);
+
     const handleButtonClick = () => {
         if (fileInputRef.current) {
             fileInputRef.current.click();
@@ -28,83 +50,42 @@ export default function Settings() {
 
     async function changeData(data: AuthFormFields) {
         try {
-            // Validate that current password is provided if any changes are being made
             if (!data.confirm && (data.name !== user?.name || data.email !== user?.email || data.password)) {
                 return;
             }
-
-            // Update name if changed
             if (data.name && data.name !== user?.name) {
                 await updateUserName(data.name, data.confirm);
             }
-
-            // Update email if changed
             if (data.email && data.email !== user?.email) {
                 await updateUserEmail(data.email, data.confirm);
             }
-
-            // Update password if new password is provided
             if (data.password) {
                 await updateUserPassword(data.confirm, data.password);
             }
-
-            // Refresh user profile
-            const updatedProfile = await getUserProfile();
-            setUser(updatedProfile);
-            // Update form values with new profile data
-            setValue('name', updatedProfile.name || '');
-            setValue('email', updatedProfile.email || '');
+            await refreshUser();
+            setValue('name', user?.name || '');
+            setValue('email', user?.email || '');
             setValue('password', '');
             setValue('confirm', '');
-
         } catch (error: unknown) {
             console.error('Failed to update profile:', error);
         }
     }
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            setImage(file);
-        }
-    };
-
-    const router = useRouter();
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchUserProfile = async () => {
-        if (typeof window !== 'undefined') {
-            const token = localStorage.getItem('access_token');
-            if (!token) {
-                setTimeout(() => {
-                    router.push('/');
-                }, 150);
-                return;
-            }
-            
             try {
-                const profile = await getUserProfile();
-                setUser(profile);
-                // Set form values when profile is loaded
-                setValue('name', profile.name || '');
-                setValue('email', profile.email || '');
+                await uploadProfileImage(file);
+                await refreshUser();
             } catch (error) {
-                console.error('Failed to fetch user profile:', error);
-                // If token is expired or invalid, redirect to login
-                router.push('/');
-            } finally {
-                setTimeout(() => {
-                    setLoading(false);
-                }, 150);
+                console.error('Failed to upload profile image:', error);
             }
         }
     };
 
-    fetchUserProfile();
-    }, [router, setValue]);
-
-    if (loading) {
+    // Only render spinner until session is checked and user is loaded
+    if (!sessionChecked || isLoading || !user) {
         return (
             <div className='min-h-screen bg-[#111418] flex items-center justify-center'>
                 <span className='text-white text-xl'>Loading...</span>
@@ -121,8 +102,10 @@ export default function Settings() {
                     <div className='bg-[#181B20] text-white rounded-3xl flex flex-col items-center w-105 h-120 p-9 gap-4'>
                         <h1 className='text-left w-[100%] font-semibold text-white text-2xl mb-5 p-0 m-0'>Profile</h1>
                         <Avatar className="cursor-pointer w-30 h-30" >
-                            {image? <AvatarImage src={URL.createObjectURL(image)} className="scale-120 border border-[#23262b]" />
-                            :<AvatarFallback className="bg-[#111418] text-white">CN</AvatarFallback>}
+                            {user?.profileImageUrl
+                                ? <AvatarImage src={user.profileImageUrl} className="scale-120 border border-[#23262b]" />
+                                : <AvatarFallback className="bg-[#111418] text-white">CN</AvatarFallback>
+                            }
                         </Avatar>
                         <p className="font-semibold text-white text-3xl p-0 m-0">{user?.name || ''}</p>
                         <p>{user?.email || ''}</p>
