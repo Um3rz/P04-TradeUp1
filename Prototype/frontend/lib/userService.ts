@@ -6,7 +6,30 @@ export interface User {
   name: string | null;
   role: string;
   balance: number;
+  profileImageUrl?: string | null;
 }
+
+// Upload profile image for current user
+export const uploadProfileImage = async (file: File): Promise<string> => {
+  const token = localStorage.getItem('access_token');
+  if (!token) {
+    throw new Error('No authentication token found');
+  }
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await fetch('http://localhost:3001/users/profile-picture', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+    body: formData,
+  });
+  if (!response.ok) {
+    throw new Error('Failed to upload profile image');
+  }
+  const data = await response.json();
+  return data.imageUrl;
+};
 
 export const getUserProfile = async (): Promise<User> => {
   const token = localStorage.getItem('access_token');
