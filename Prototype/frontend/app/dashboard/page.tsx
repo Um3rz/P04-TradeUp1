@@ -2,6 +2,9 @@
 import React, { useState } from "react";
 import { useUser } from '@/context/UserContext';
 import TopBar from '@/components/topbar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 /**
  * Dashboard — PSX stocks list + Watchlist (add/remove)
@@ -331,27 +334,37 @@ React.useEffect(() => {
     <main className="min-h-screen w-full bg-[#111418]">
       {/* Wallet Popup */}
       {showWalletPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg">
-            <h2>Fund Your Wallet</h2>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              const amount = parseFloat(e.currentTarget.amount.value);
-              if (amount > 0) handleFundWallet(amount);
-            }}>
-              <input
-                type="number"
-                name="amount"
-                placeholder="Enter amount"
-                className="border p-2 w-full mb-4"
-                required
-                min="1"
-              />
-              <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-                Add Funds
-              </button>
-            </form>
-          </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+          <Card className="w-full max-w-sm">
+            <CardHeader>
+              <CardTitle>Fund Your Wallet</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form
+                onSubmit={e => {
+                  e.preventDefault();
+                  const amount = parseFloat(e.currentTarget.amount.value);
+                  if (amount > 0) handleFundWallet(amount);
+                }}
+              >
+                <div className="grid gap-4">
+                  <div className="grid gap-2">
+                    <Input
+                      id="amount"
+                      name="amount"
+                      type="number"
+                      placeholder="Enter amount"
+                      required
+                      min="1"
+                    />
+                  </div>
+                  <Button type="submit" className="w-full">
+                    Add Funds
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       )}
 
