@@ -10,8 +10,8 @@ import { getUserProfile, User } from "@/lib/userService";
 export default function TopBar() {
 
     const [hidden, setHidden] = useState<string>('none');
-    const [url, setUrl] = useState<string | null>(null);
-    const [img, setimg] = useState<string | null>(null);
+    const [url, setUrl] = useState<string | undefined>(undefined);
+    const [img, setimg] = useState<string | undefined>(undefined);
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const router = useRouter();

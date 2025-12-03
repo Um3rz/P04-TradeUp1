@@ -239,10 +239,10 @@ React.useEffect(() => {
     await apiPost("/watchlist", { symbol });
 
     // Immediately fetch the fully-detailed row and prepend it
-    let normalized = { symbol, name: null, marketType: "REG", tick: null };
+    let normalized: StockData = { symbol, name: null, marketType: "REG", tick: null };
     try {
       const raw = await apiGet(`/stocks/${encodeURIComponent(symbol)}`);
-      normalized = normalizeStock(raw, symbol);
+      normalized = normalizeStock(raw as ApiStockResponse, symbol);
     } catch {
       // ignore; keep minimal fallback
     }
