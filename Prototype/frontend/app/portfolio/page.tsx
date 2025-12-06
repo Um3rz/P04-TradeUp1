@@ -31,6 +31,17 @@ export default function Portfolio() {
   const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sessionChecked, setSessionChecked] = useState(false);
+
+  // Session check
+  useEffect(() => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+    if (!token) {
+      router.replace("/");
+    } else {
+      setSessionChecked(true);
+    }
+  }, [router]);
 
   const fetchPortfolio = useCallback(async () => {
     const token = localStorage.getItem('access_token');
@@ -114,7 +125,7 @@ export default function Portfolio() {
     return `${numValue >= 0 ? '+' : ''}${numValue.toFixed(2)}%`;
   };
 
-  if (loading) {
+  if (!sessionChecked || loading) {
     return (
       <div className="min-h-screen bg-[#111418] flex items-center justify-center">
         <span className="text-white text-xl">Loading...</span>

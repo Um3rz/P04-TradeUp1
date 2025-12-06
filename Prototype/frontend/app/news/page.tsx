@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import TopBar from '@/components/topbar';
 import { fetchLatestNews, fetchStockNews } from '@/lib/newsService';
 import { NewsArticle, StockNewsArticle } from '@/types/news';
+import { useRouter } from 'next/navigation';
 
 type CombinedArticle = NewsArticle | StockNewsArticle;
 
@@ -12,12 +13,25 @@ interface ArticlesSection {
 }
 
 export default function NewsPage() {
+  const router = useRouter();
+  
   const [generalArticles, setGeneralArticles] = useState<NewsArticle[]>([]);
   const [stockArticles, setStockArticles] = useState<StockNewsArticle[]>([]);
   const [searchTicker, setSearchTicker] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [sessionChecked, setSessionChecked] = useState(false);
+
+  // Session check
+  useEffect(() => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+    if (!token) {
+      router.replace("/");
+    } else {
+      setSessionChecked(true);
+    }
+  }, [router]);
 
   const isNewsArticle = (article: CombinedArticle): article is NewsArticle => {
     return 'link' in article;
@@ -29,6 +43,18 @@ export default function NewsPage() {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
+  const formatDateTime = (dateString: string): string => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
       });
     } catch {
       return dateString;
@@ -93,6 +119,15 @@ export default function NewsPage() {
     loadLatestNews();
   }, [loadLatestNews]);
 
+  // Full-screen loading before session check or initial data load
+  if (!sessionChecked || loading) {
+    return (
+      <div className='min-h-screen bg-[#0F1419] flex items-center justify-center'>
+        <span className='text-white text-xl'>Loading...</span>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#0F1419] text-white">
       <TopBar />
@@ -126,11 +161,7 @@ export default function NewsPage() {
         )}
 
         <div>
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <p className="text-gray-400 text-lg">Loading news...</p>
-            </div>
-          ) : error ? (
+          {error ? (
             <div className="text-red-500 text-center py-8 bg-red-900 bg-opacity-20 rounded-lg border border-red-500 mb-8">
               {error}
             </div>
@@ -218,17 +249,20 @@ export default function NewsPage() {
                         
                         <div className="p-6 flex flex-col justify-between flex-1">
                           <div>
-                            <h3 className="font-bold text-lg mb-2 group-hover:text-blue-400 transition-colors line-clamp-2">
-                              {article.title}
-                            </h3>
-                            <p className="text-gray-300 text-sm line-clamp-3">
-                              {article.text}
-                            </p>
+                            <div className="flex justify-between items-start gap-3 mb-3">
+                              <h3 className="font-bold text-lg group-hover:text-blue-400 transition-colors line-clamp-2 flex-1">
+                                {article.title}
+                              </h3>
+                              <p className="text-xs text-gray-400 whitespace-nowrap font-medium flex-shrink-0">
+                                {formatDateTime(article.date)}
+                              </p>
+                            </div>
+                            <div className="text-gray-300 text-sm line-clamp-3" dangerouslySetInnerHTML={{ __html: article.content }} />
                           </div>
                           
                           <div className="mt-4 pt-4 border-t border-[#23262b]">
                             <p className="text-xs text-gray-500">
-                              {formatDate(article.publishedDate)}
+                              {formatDate(article.date)}
                             </p>
                           </div>
                         </div>
