@@ -16,91 +16,42 @@ const FAQ_DATA: FAQItem[] = [
   {
     category: "Trading",
     question: "How do I buy stocks?",
-    answer: createLinkText(
-      "Navigate to the 'Buy' page, search for a stock ticker (e.g., AAPL), enter the number of shares you want to purchase, and click 'Buy'. Make sure you have sufficient balance in your account. You can access the buy page directly here:",
-      "/buy",
-      "Buy Stocks"
-    )
+    answer: createLinkText("Search for a stock ticker, enter shares, and click Buy.", "/buy", "Buy Page")
   },
   {
     category: "Trading",
     question: "How do I sell stocks?",
-    answer: createLinkText(
-      "Go to your 'Portfolio' page, find the stock you want to sell, click on it, and select 'Sell'. Choose how many shares to sell and confirm the transaction. Access your portfolio here:",
-      "/portfolio", 
-      "My Portfolio"
-    )
+    answer: createLinkText("Find your stock in portfolio, click it, and select Sell.", "/portfolio", "Portfolio")
   },
   {
-    category: "Trading",
-    question: "Are trades executed in real-time?",
-    answer: "Yes, trades are executed using real-time market data. However, since this is a simulation, you're not actually buying real stocks - just practicing with virtual money."
+    category: "Portfolio",
+    question: "How do I view my holdings?",
+    answer: createLinkText("See all holdings, values, and performance.", "/portfolio", "Portfolio")
   },
   {
-    category: "Portfolio & Watchlist",
-    question: "How do I view my portfolio?",
-    answer: createLinkText(
-      "Click on 'Portfolio' in the navigation menu to see all your current holdings, their current values, profit/loss, and overall portfolio performance.",
-      "/portfolio",
-      "Go to Portfolio"
-    )
+    category: "Portfolio",
+    question: "How is P&L calculated?",
+    answer: "P&L = (Current Price - Purchase Price) × Shares. Green = gains, red = losses."
   },
   {
-    category: "Portfolio & Watchlist",
-    question: "What is a watchlist and how do I use it?", 
-    answer: "A watchlist lets you track stocks you're interested in without buying them. Add stocks to your watchlist to monitor their prices and performance over time."
+    category: "Charts",
+    question: "How do I view charts?",
+    answer: createLinkText("Search any ticker for interactive price charts.", "/charts", "Charts")
   },
   {
-    category: "Portfolio & Watchlist",
-    question: "How is profit and loss calculated?",
-    answer: "P&L is calculated as (Current Price - Purchase Price) × Number of Shares. Green indicates gains, red indicates losses. Your total portfolio P&L is the sum of all individual stock P&L."
+    category: "Charts",
+    question: "What timeframes are available?",
+    answer: "1 day, 5 days, 1 month, 6 months, 1 year, 5 years."
   },
   {
-    category: "Charts & Data",
-    question: "How do I view stock charts?",
-    answer: createLinkText(
-      "Go to the 'Charts' page and search for any stock ticker. You'll see interactive charts with price history, volume data, and technical indicators.",
-      "/charts",
-      "View Charts"
-    )
+    category: "News",
+    question: "How do I access news?",
+    answer: createLinkText("Latest financial news and ticker-specific articles.", "/news", "News")
   },
   {
-    category: "Charts & Data",
-    question: "What chart timeframes are available?",
-    answer: "Charts support multiple timeframes including 1 day, 5 days, 1 month, 6 months, 1 year, and 5 years to help you analyze both short-term and long-term trends."
-  },
-  {
-    category: "Charts & Data", 
-    question: "Where does the market data come from?",
-    answer: "TradeUp uses real-time market data from reliable financial data providers to ensure accurate pricing and chart information."
-  },
-  {
-    category: "News & Research",
-    question: "How do I access market news?",
-    answer: createLinkText(
-      "Visit the 'News' page to see the latest financial news. You can also search for news specific to any stock ticker you're interested in.",
-      "/news",
-      "Read News"
-    )
-  },
-  {
-    category: "News & Research",
-    question: "Can I search for news about specific stocks?",
-    answer: "Yes! On the News page, use the search bar to enter a stock ticker (like TSLA or MSFT) to see news articles specifically related to that company."
-  },
-  {
-    category: "Account & Settings",
-    question: "How do I update my profile information?",
-    answer: createLinkText(
-      "Go to 'Settings' in your account menu to update your name, email, profile picture, and other account preferences.",
-      "/settings",
-      "Access Settings"
-    )
-  },
-  {
-    category: "Account & Settings",
-    question: "How do I change my password?",
-    answer: "In the Settings page, you'll find a 'Change Password' section where you can update your password. Make sure to use a strong, unique password."
+    category: "Settings",
+    question: "How do I update my profile?",
+    answer: createLinkText("Update name, email, and profile picture.", "/settings", "Settings")
   }
 ];
 
