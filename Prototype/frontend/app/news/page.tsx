@@ -10,10 +10,15 @@ import { NewsArticle, StockNewsArticle } from '@/types/news';
 
 
 export default function NewsPage() {
+  const router = useRouter();
+  const { user, isLoading: userLoading } = useUser();
+  
   const [generalArticles, setGeneralArticles] = useState<NewsArticle[]>([]);
   const [stockArticles, setStockArticles] = useState<StockNewsArticle[]>([]);
   const [searchTicker, setSearchTicker] = useState<string>('');
+  const [lastSearchedTicker, setLastSearchedTicker] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
+  const [searchLoading, setSearchLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState<boolean>(false);
 
@@ -25,6 +30,18 @@ export default function NewsPage() {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
+  const formatDateTime = (dateString: string): string => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
       });
     } catch {
       return dateString;
@@ -55,9 +72,10 @@ export default function NewsPage() {
     }
 
     try {
-      setLoading(true);
+      setSearchLoading(true);
       setError(null);
       setIsSearching(true);
+      setLastSearchedTicker(ticker.toUpperCase());
       
       const searchedStockArticles = await fetchStockNews(ticker.toUpperCase());
       setStockArticles(searchedStockArticles);
@@ -67,27 +85,42 @@ export default function NewsPage() {
     } catch (err) {
       setError('Failed to load stock news');
       console.error('Error fetching stock news:', err);
-    } finally {
-      setLoading(false);
+      setSearchLoading(false);
     }
   }, [loadLatestNews]);
 
+  // Clear search loading when articles are fetched
+  useEffect(() => {
+    if (isSearching && (stockArticles.length > 0 || generalArticles.length > 0)) {
+      setSearchLoading(false);
+    }
+  }, [stockArticles, generalArticles, isSearching]);
+
   const handleInputChange = (value: string): void => {
     setSearchTicker(value);
-    
-    if (!value.trim()) {
-      loadLatestNews();
-    }
   };
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
-    handleSearchNews(searchTicker);
+    if (searchTicker.trim()) {
+      handleSearchNews(searchTicker);
+    } else {
+      loadLatestNews();
+    }
   };
 
   useEffect(() => {
     loadLatestNews();
   }, [loadLatestNews]);
+
+  // Full-screen loading before user is loaded or initial data load
+  if (userLoading || !user || loading) {
+    return (
+      <div className='min-h-screen bg-[#0F1419] flex items-center justify-center'>
+        <span className='text-white text-xl'>Loading...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0F1419] text-white">
@@ -107,7 +140,7 @@ export default function NewsPage() {
             />
             <button
               type="submit"
-              disabled={loading}
+              disabled={searchLoading}
               className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
             >
               Search
@@ -115,18 +148,15 @@ export default function NewsPage() {
           </div>
         </form>
 
-        {isSearching && searchTicker && (
-          <div className="text-sm text-gray-400 mb-6 p-3 bg-[#181B20] rounded-lg border border-[#23262b]">
-            Showing news for: <span className="text-white font-semibold">{searchTicker.toUpperCase()}</span>
+        {searchLoading && (
+          <div className="text-sm text-blue-400 mb-6 flex items-center gap-2">
+            <div className="animate-spin h-4 w-4 border-2 border-blue-400 border-t-transparent rounded-full"></div>
+            Searching for {searchTicker.toUpperCase()}...
           </div>
         )}
 
         <div>
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <p className="text-gray-400 text-lg">Loading news...</p>
-            </div>
-          ) : error ? (
+          {error ? (
             <div className="text-red-500 text-center py-8 bg-red-900 bg-opacity-20 rounded-lg border border-red-500 mb-8">
               {error}
             </div>
@@ -135,7 +165,7 @@ export default function NewsPage() {
               {isSearching && stockArticles.length > 0 && (
                 <div className="mb-12">
                   <h2 className="text-2xl font-bold mb-6 text-blue-400">
-                    {searchTicker.toUpperCase()} News
+                    {lastSearchedTicker} News
                   </h2>
                   <div className="grid gap-6">
                     {stockArticles.map((article: StockNewsArticle, index: number) => (
@@ -217,17 +247,20 @@ export default function NewsPage() {
                         
                         <div className="p-6 flex flex-col justify-between flex-1">
                           <div>
-                            <h3 className="font-bold text-lg mb-2 group-hover:text-blue-400 transition-colors line-clamp-2">
-                              {article.title}
-                            </h3>
-                            <p className="text-gray-300 text-sm line-clamp-3">
-                              {article.text}
-                            </p>
+                            <div className="flex justify-between items-start gap-3 mb-3">
+                              <h3 className="font-bold text-lg group-hover:text-blue-400 transition-colors line-clamp-2 flex-1">
+                                {article.title}
+                              </h3>
+                              <p className="text-xs text-gray-400 whitespace-nowrap font-medium flex-shrink-0">
+                                {formatDateTime(article.date)}
+                              </p>
+                            </div>
+                            <div className="text-gray-300 text-sm line-clamp-3" dangerouslySetInnerHTML={{ __html: article.content }} />
                           </div>
                           
                           <div className="mt-4 pt-4 border-t border-[#23262b]">
                             <p className="text-xs text-gray-500">
-                              {formatDate(article.publishedDate)}
+                              {formatDate(article.date)}
                             </p>
                           </div>
                         </div>

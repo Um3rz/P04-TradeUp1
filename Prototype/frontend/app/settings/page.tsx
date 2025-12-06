@@ -126,7 +126,7 @@ export default function Settings() {
                                 {...register('name')} 
                                 type="text" 
                                 placeholder="" 
-                                className="border border-[#23262b]" 
+                                className="border border-[#23262b] text-white" 
                             />
                         </div>
                         <div className="mb-3">
@@ -140,7 +140,7 @@ export default function Settings() {
                                 })} 
                                 type="email" 
                                 placeholder="" 
-                                className="border border-[#23262b]" 
+                                className="border border-[#23262b] text-white" 
                             />
                             {errors.email && (
                                 <span className="text-red-500 text-xs mt-1">
@@ -159,7 +159,7 @@ export default function Settings() {
                                 })} 
                                 type="password" 
                                 placeholder="" 
-                                className="border border-[#23262b]" 
+                                className="border border-[#23262b] text-white" 
                             />
                             {errors.password && (
                                 <span className="text-red-500 text-xs mt-1">
@@ -173,7 +173,7 @@ export default function Settings() {
                                 {...register('confirm')} 
                                 type="password" 
                                 placeholder="" 
-                                className="border border-[#23262b]" 
+                                className="border border-[#23262b] text-white" 
                             />
                         </div>
                         <div className="flex justify-between">

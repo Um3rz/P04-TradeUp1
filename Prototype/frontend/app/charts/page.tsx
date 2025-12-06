@@ -1,5 +1,7 @@
 'use client'
 import { useEffect, useState, useRef, useCallback } from "react";
+import { useRouter } from 'next/navigation';
+import { useUser } from "@/context/UserContext";
 import { io, Socket } from "socket.io-client";
 import { createChart, IChartApi, ISeriesApi, UTCTimestamp } from 'lightweight-charts';
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,6 +44,9 @@ interface MarketStatus {
 }
 
 export default function Charts() {
+    const router = useRouter();
+    const { user, isLoading: userLoading } = useUser();
+    
     const [tickData, setTickData] = useState<TickData | null>(null);
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);
@@ -52,11 +57,22 @@ export default function Charts() {
     const [timeframe, setTimeframe] = useState<string>('1m');
     const [historicalData, setHistoricalData] = useState<CandleData[]>([]);
     const [isLoadingHistory, setIsLoadingHistory] = useState<boolean>(false);
+    const [sessionChecked, setSessionChecked] = useState(false);
     const [marketStatus, setMarketStatus] = useState<MarketStatus>({
         isConnected: false,
         lastUpdateTime: 0,
         isMarketClosed: false
     });
+
+    // Session check
+    useEffect(() => {
+        const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+        if (!token) {
+            router.replace("/");
+        } else {
+            setSessionChecked(true);
+        }
+    }, [router]);
     const CANDLE_INTERVAL = 1 * 60 * 1000;
     const MARKET_CLOSED_TIMEOUT = 5000;
     const marketCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -356,6 +372,15 @@ export default function Charts() {
         if (tickData) return "text-green-400";
         return "text-gray-400";
     };
+
+    // Full-screen loading before session check, user profile load, or historical data load
+    if (!sessionChecked || userLoading || !user || isLoadingHistory) {
+        return (
+            <div className='min-h-screen bg-[#111418] flex items-center justify-center'>
+                <span className='text-white text-xl'>Loading...</span>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[#111418]">

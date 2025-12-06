@@ -1,10 +1,12 @@
 export interface NewsArticle {
   title: string;
-  text: string;
+  content: string;
   link: string;
   image: string;
-  publishedDate: string;
-  updatedDate?: string;
+  date: string;
+  author?: string;
+  site?: string;
+  tickers?: string;
 }
 
 export interface StockNewsArticle {
