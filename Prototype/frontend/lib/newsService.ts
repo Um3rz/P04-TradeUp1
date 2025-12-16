@@ -1,10 +1,9 @@
 import { NewsArticle, StockNewsArticle } from '@/types/news';
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+import API_BASE_URL from './api';
 
 export async function fetchLatestNews(): Promise<NewsArticle[]> {
   try {
-    const response = await fetch(`${API_BASE}/news/latest`, {
+    const response = await fetch(`${API_BASE_URL}/news/latest`, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -29,7 +28,7 @@ export async function fetchLatestNews(): Promise<NewsArticle[]> {
 
 export async function fetchStockNews(ticker: string): Promise<StockNewsArticle[]> {
   try {
-    const response = await fetch(`${API_BASE}/news/stock`, {
+    const response = await fetch(`${API_BASE_URL}/news/stock`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

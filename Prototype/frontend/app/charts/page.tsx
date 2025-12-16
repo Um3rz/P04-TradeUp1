@@ -230,7 +230,10 @@ export default function Charts() {
             socketRef.current.close();
         }
 
-        const socket: Socket = io(`${API_BASE_URL}/ws`);
+        const socket: Socket = io(`${API_BASE_URL}/ws`,{
+            transports: ['websocket'],
+            withCredentials: true,
+        });
         socketRef.current = socket;
 
         socket.on('connect', () => {

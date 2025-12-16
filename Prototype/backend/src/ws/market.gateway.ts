@@ -16,7 +16,17 @@ interface TickUpdateMessage {
   [key: string]: unknown;
 }
 
-@WebSocketGateway({ namespace: '/ws', cors: true })
+@WebSocketGateway({ 
+  namespace: '/ws', 
+  cors: {
+    origin: [
+      'http://localhost:3000',
+      'https://p04-trade-up.vercel.app',
+    ],
+    credentials: true,
+    methods: ['GET', 'POST'],
+  } 
+})
 export class MarketGateway implements OnModuleInit {
   @WebSocketServer()
   server!: Server;
@@ -55,11 +65,33 @@ export class MarketGateway implements OnModuleInit {
       }
     });
 
+<<<<<<< HEAD
     ws.on('message', (data: Buffer) => {
       try {
         const msg: TickUpdateMessage = JSON.parse(
           data.toString('utf-8'),
         ) as TickUpdateMessage;
+=======
+    // Fix: Type 'data' as unknown and safely narrow types instead of using 'any'
+    ws.on('message', (data: unknown) => {
+      try {
+        let rawMessage: string;
+
+        if (Buffer.isBuffer(data)) {
+          rawMessage = data.toString();
+        } else if (Array.isArray(data)) {
+          // If data is Buffer[], concatenate it
+          rawMessage = Buffer.concat(data as Buffer[]).toString();
+        } else if (data instanceof ArrayBuffer) {
+          rawMessage = Buffer.from(data).toString();
+        } else {
+          // Safe fallback
+          rawMessage = String(data);
+        }
+
+        const msg = JSON.parse(rawMessage) as TickUpdateMessage;
+
+>>>>>>> 628b917f7cef3fbceefa4a642393f7368c7b7ac9
         if (msg?.type === 'tickUpdate' && msg?.symbol) {
           console.log(msg);
           this.server.to(`symbol:${msg.symbol}`).emit('tickUpdate', msg);

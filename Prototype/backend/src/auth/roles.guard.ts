@@ -2,6 +2,12 @@ import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from './roles.decorator';
 
+interface RequestWithUser {
+  user?: {
+    role?: string;
+  };
+}
+
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
@@ -17,6 +23,7 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
+<<<<<<< HEAD
     interface RequestUser {
       userId: number;
       email: string;
@@ -24,10 +31,14 @@ export class RolesGuard implements CanActivate {
     }
 
     const { user }: { user: RequestUser } = context.switchToHttp().getRequest();
+=======
+    const request = context.switchToHttp().getRequest<RequestWithUser>();
+    const user = request.user;
+>>>>>>> 628b917f7cef3fbceefa4a642393f7368c7b7ac9
 
     // Check if the user object and role exist, and if the user's role is included in the required roles.
-    return (
-      user && user.role && requiredRoles.some((role) => user.role === role)
+    return Boolean(
+      user && user.role && requiredRoles.some((role) => user.role === role),
     );
   }
 }
